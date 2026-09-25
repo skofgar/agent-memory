@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- the deck moved with agent-memory into the Mercury family; forward to the official copy -->
+<script>location.replace("https://accenture.github.io/mercury-go/agent-memory-deck.html" + location.hash);</script>
+<title>agent-memory — v4.39.2 · Mercury family</title>
+<style>
+  :root{
+    --bg:#0b1020; --bg2:#0e1530; --panel:#131c3a; --panel2:#18224a;
+    --ink:#eef2ff; --muted:#9fb0d6; --line:#2a3766;
+    --accent:#7c5cff; --accent2:#22d3ee; --good:#34d399; --warn:#fbbf24;
+    --grad:linear-gradient(120deg,#7c5cff,#22d3ee);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{
+    background:radial-gradient(1200px 800px at 70% -10%,#1a2350 0%,var(--bg) 55%) fixed;
+    color:var(--ink);
+    font:18px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .deck{height:100vh;width:100vw;overflow:hidden;position:relative}
+  .slide{
+    position:absolute;inset:0 0 56px 0;display:none;flex-direction:column;justify-content:center;
+    padding:6vh 9vw;animation:fade .4s ease both;overflow-y:auto;
+  }
+  .slide.active{display:flex}
+  @keyframes fade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  h1{font-size:clamp(34px,6vw,64px);line-height:1.05;margin:.1em 0;letter-spacing:-.02em}
+  h2{font-size:clamp(26px,4vw,42px);margin:0 0 .5em;letter-spacing:-.01em}
+  .grad{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .kicker{font-size:14px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent2);font-weight:700;margin-bottom:.6em}
+  .lead{font-size:clamp(18px,2.2vw,24px);color:var(--muted);max-width:60ch}
+  ul{margin:.4em 0;padding-left:0;list-style:none}
+  li{position:relative;padding:.35em 0 .35em 1.6em;max-width:62ch}
+  li::before{content:"";position:absolute;left:0;top:1.05em;width:.7em;height:.7em;border-radius:3px;background:var(--grad)}
+  .muted{color:var(--muted)}
+  .big{font-size:clamp(22px,3vw,30px)}
+  code,.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.92em}
+  .pill{display:inline-block;padding:.15em .6em;border:1px solid var(--line);border-radius:999px;color:var(--muted);font-size:.8em}
+  .grid{display:grid;gap:18px;margin-top:.6em}
+  .g2{grid-template-columns:1fr 1fr}.g3{grid-template-columns:repeat(3,1fr)}.g4{grid-template-columns:repeat(4,1fr)}
+  .card{background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid var(--line);border-radius:16px;padding:18px 20px}
+  .card h3{margin:.1em 0 .3em;font-size:19px}
+  .card p{margin:0;color:var(--muted);font-size:15px;line-height:1.45}
+  .loop{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:.4em}
+  .step{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:10px 14px;font-weight:600}
+  .step b{display:block;font-size:12px;color:var(--accent2);font-weight:700;letter-spacing:.04em}
+  .arr{color:var(--accent);font-size:22px;font-weight:700}
+  .new{outline:2px solid var(--accent);box-shadow:0 0 0 4px rgba(124,92,255,.15)}
+  table{border-collapse:collapse;width:100%;margin-top:.5em;font-size:15px}
+  th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{color:var(--accent2);font-size:12px;letter-spacing:.08em;text-transform:uppercase}
+  td.t{color:var(--muted)} td.us{color:var(--ink)}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:26px;align-items:start}
+  .layer{border-radius:18px;padding:22px;border:1px solid var(--line)}
+  .layer.back{background:linear-gradient(180deg,#10204a,#0d1838)}
+  .layer.fwd{background:linear-gradient(180deg,#1d1640,#140f30)}
+  .layer .tag{font-size:12px;letter-spacing:.12em;text-transform:uppercase;font-weight:700}
+  .back .tag{color:var(--accent2)} .fwd .tag{color:var(--accent)}
+  .quote{font-size:clamp(22px,3vw,34px);line-height:1.3;max-width:24ch;font-weight:600}
+  .progress{position:fixed;top:0;left:0;height:4px;background:var(--grad);width:0;transition:width .3s;z-index:10}
+  .foot{position:absolute;bottom:5vh;left:9vw;color:var(--line);font-size:12px;letter-spacing:.1em;text-transform:uppercase}
+
+  /* ── chrome (navigation design borrowed from the mercury-composable deck) ── */
+  .bar{
+    position:absolute;left:0;right:0;bottom:0;height:56px;
+    display:flex;align-items:center;gap:18px;padding:0 clamp(18px,4vw,48px);
+    border-top:1px solid var(--line);background:var(--bg);z-index:5;
+  }
+  .wordmark{font-weight:700;letter-spacing:.02em}
+  .wordmark .dot{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .home{display:flex;align-items:center;gap:9px;color:inherit;text-decoration:none}
+  .home svg{width:21px;height:21px;fill:var(--accent);flex:none;transition:fill .15s}
+  .home:hover svg{fill:var(--accent2)}
+  .home:hover .wordmark{color:var(--accent2)}
+  .home:focus-visible{outline:2px solid var(--warn);outline-offset:3px;border-radius:6px}
+  .counter{font-variant-numeric:tabular-nums;color:var(--muted);font-size:.85em;margin-left:auto}
+  .dots{display:flex;gap:7px}
+  .dots button{width:9px;height:9px;border-radius:50%;border:0;background:var(--line);cursor:pointer;padding:0}
+  .dots button.on{background:var(--accent)}
+  .dots button:focus-visible{outline:2px solid var(--warn);outline-offset:2px}
+  .navbtn{border:1px solid var(--line);background:var(--panel);color:var(--ink);
+          border-radius:8px;padding:.35em .8em;font:inherit;font-size:.85em;cursor:pointer}
+  .navbtn:hover{background:var(--panel2)}
+  .navbtn:focus-visible{outline:2px solid var(--warn);outline-offset:2px}
+  .hint{color:var(--muted);font-size:.8em}
+  @media (max-width:720px){ .hint,.dots{display:none} }
+
+  /* invisible page-turn click zones (left back, right forward; middle stays selectable) */
+  .zone{position:absolute;top:0;bottom:56px;z-index:2;background:transparent;border:0;cursor:pointer}
+  .zone:focus-visible{outline:2px solid var(--warn);outline-offset:-4px}
+  .zone.zback{left:0;width:22%} .zone.zfwd{right:0;width:26%}
+
+  /* ── print: a light handout, one slide per page ── */
+  @media print{
+    :root{--bg:#fff;--bg2:#fff;--panel:#f2f4fb;--panel2:#e9edf9;--ink:#1b2340;--muted:#4a5578;
+          --line:#d5dbef;--accent:#5b3df0;--accent2:#0e7490;--good:#0f766e;--warn:#a16207;
+          --grad:linear-gradient(120deg,#5b3df0,#0e7490)}
+    body{background:#fff;color:var(--ink)}
+    .deck{height:auto;width:auto;overflow:visible;position:static}
+    .slide{position:static;display:flex !important;inset:auto;padding:24px 8mm;
+           page-break-after:always;overflow:visible;animation:none;height:auto}
+    /* .foot is absolutely positioned against its slide; static slides would re-anchor
+       every foot to page 1 and overlap them — let it flow at the end of its own slide */
+    .foot{position:static;margin-top:2em}
+    .grad{background:none;color:var(--accent);-webkit-text-fill-color:var(--accent)}
+    .bar,.zone,.progress{display:none}
+  }
+</style>
+</head>
+<body>
+<div class="progress" id="bar"></div>
+<div class="deck" id="deck">
+
+  <!-- 1 -->
+  <section class="slide active">
+    <div class="kicker">agent-memory · v4.39.2 · Mercury family</div>
+    <h1>A lightweight, vendor-neutral<br><span class="grad">AI memory + cognitive loop</span></h1>
+    <p class="lead" style="margin-top:.6em">Turning shared project context into <b>deterministic delivery with near-zero drift</b> — for human–AI collaboration, across any AI vendor.</p>
+    <p style="margin-top:1.1em"><span class="pill">Official · graduated into the Mercury family — Accenture open source for human–AI collaboration — September 10, 2026</span></p>
+    <div class="foot">September 2026</div>
+  </section>
+
+  <!-- 1b · the era shift -->
+  <section class="slide">
+    <div class="kicker">The era shift</div>
+    <h2>From prompts, to context, to <span class="grad">intent</span></h2>
+    <div class="grid g3" style="margin-top:.6em">
+      <div class="card"><h3>Prompt engineering</h3><p>Human provides instructions. AI generates responses. Better phrasing, better answers — one turn at a time.</p></div>
+      <div class="card"><h3>Context engineering</h3><p>Human provides knowledge, constraints, project files. AI responds with more consistency — until the <b>static context drifts</b> and agents confidently follow instructions that are no longer true.</p></div>
+      <div class="card"><h3>Intent-driven development</h3><p>Human provides <b>vision, boundaries, priorities, judgment</b>. AI collaborates in analysis, design, implementation, refinement — inside <b>living context</b> that evolves with the code.</p></div>
+    </div>
+    <p class="lead" style="margin-top:1em"><i>Prompts tell AI what to do. Context helps AI understand. <b>Intent explains what matters.</b></i> agent-memory is infrastructure for the third era.</p>
+  </section>
+
+  <!-- 2 -->
+  <section class="slide">
+    <div class="kicker">The problem</div>
+    <h2>Two failure modes of memory-driven agents</h2>
+    <div class="grid g2">
+      <div class="card"><h3>Memory drift &amp; vendor silos</h3><p>Context is re-explained every session; decisions are silently forgotten or contradicted; each AI tool hoards its own steering files — no shared, durable project memory.</p></div>
+      <div class="card"><h3>Intent ↔ delivery gap</h3><p>Agents are creative, but keeping what's <i>built</i> faithful to what was <i>intended</i> is unmanaged. Reversed decisions and "confidently wrong" facts pile up.</p></div>
+    </div>
+    <p class="lead" style="margin-top:1em">The bottleneck isn't the model — it's the architecture <span class="muted">around</span> it. <i>"Acceleration without direction is only faster drift."</i></p>
+  </section>
+
+  <!-- 3 -->
+  <section class="slide">
+    <div class="kicker">The idea</div>
+    <h2>Two complementary layers over one shared <code>memory/</code></h2>
+    <div class="two">
+      <div class="layer back">
+        <div class="tag">Backward · Evolving Memory</div>
+        <h3 style="margin:.3em 0">"Where are we, and why?"</h3>
+        <p class="muted">An event-sourced ledger projected into live state — deterministic decay, supersession, provenance. Faithful to what <b>happened</b>.</p>
+      </div>
+      <div class="layer fwd">
+        <div class="tag">Forward · VBDI loop</div>
+        <h3 style="margin:.3em 0">"Where are we going — faithfully?"</h3>
+        <p class="muted">A cognitive loop with an enforceable intent trace and human gates. Faithful to what was <b>intended</b>.</p>
+      </div>
+    </div>
+    <p class="lead" style="margin-top:1em">No-code, markdown-only. The files <i>are</i> the product; the agent is the runtime.</p>
+  </section>
+
+  <!-- 4 -->
+  <section class="slide">
+    <div class="kicker">Backward layer</div>
+    <h2>Evolving memory — event-sourced, deterministic</h2>
+    <div class="loop">
+      <span class="step"><b>WRITE</b>sessions (ledger)</span><span class="arr">→</span>
+      <span class="step"><b>MANAGE</b>review ritual</span><span class="arr">→</span>
+      <span class="step"><b>READ</b>continuity.md</span><span class="arr">↺</span>
+    </div>
+    <ul style="margin-top:1em">
+      <li><b>Immutable ledger → derived projection.</b> Session logs are the events; <code>continuity.md</code> is recomputable from them by <b>replay</b>.</li>
+      <li><b>Decay by counting, not scoring.</b> Facts fade through tiers by counting session files — <b>no floating-point</b>, so every agent gets the same result.</li>
+      <li><b>Nothing is deleted</b> — faded facts archive to a greppable index.</li>
+    </ul>
+  </section>
+
+  <!-- 5 -->
+  <section class="slide">
+    <div class="kicker">Backward layer · trust</div>
+    <h2>Memory you can trust</h2>
+    <div class="grid g4">
+      <div class="card"><h3>Supersession</h3><p>A reversed/false fact is marked <code>superseded</code> — change, not just disuse.</p></div>
+      <div class="card"><h3>Invariant re-verify</h3><p>Never-decay facts are periodically re-confirmed by a human. Never-decay ≠ never-checked.</p></div>
+      <div class="card"><h3>Contradiction check</h3><p>A new fact is scanned against existing ones at write time — never pick a winner.</p></div>
+      <div class="card"><h3>Provenance</h3><p>Each fact traces to its source session — one hop; anti-poisoning by design.</p></div>
+    </div>
+    <p class="lead" style="margin-top:1em">Retrieval stays <b>lexical + indexed</b> by design — auditable and replayable, not a <span style="white-space:nowrap">black-box</span> vector store.</p>
+  </section>
+
+  <!-- 6 -->
+  <section class="slide">
+    <div class="kicker">Forward layer</div>
+    <h2>The VBDI cognitive loop</h2>
+    <div class="loop">
+      <span class="step"><b>STATE</b>Current State</span><span class="arr">→</span>
+      <span class="step new"><b>TARGET</b>Vision</span><span class="arr">→</span>
+      <span class="step new"><b>GAP</b>Blueprint</span><span class="arr">→</span>
+      <span class="step"><b>SHAPE</b>Design</span><span class="arr">→</span>
+      <span class="step"><b>ACT</b>Implementation</span><span class="arr">→</span>
+      <span class="step"><b>LEARN</b>Feedback</span><span class="arr">↺</span>
+    </div>
+    <ul style="margin-top:1em">
+      <li><b>Human gates.</b> Each altitude change is an Open Thread the human approves — <span style="white-space:nowrap">the agent proposes.</span></li>
+      <li><b>Bootstrap, never fabricate.</b> Enable/upgrade seed a <i>DRAFT</i> Vision (context only); the target is the human's to set.</li>
+      <li><b>Process-neutral.</b> The lightweight default; a target may layer SDLC/scrum on top — its choice, never in <code>memory/</code>.</li>
+    </ul>
+  </section>
+
+  <!-- 7 -->
+  <section class="slide">
+    <div class="kicker">The integration insight</div>
+    <h2>Only <span class="grad">two</span> primitives are new</h2>
+    <p class="lead">The loop mostly already exists in the memory layer — we integrate by <b>mapping</b>, not rebuilding.</p>
+    <table>
+      <tr><th>Primitive</th><th>Realized by</th></tr>
+      <tr><td class="us">Current State</td><td class="t"><code>continuity.md</code></td></tr>
+      <tr><td class="us">Vision <span class="pill">new</span></td><td class="t"><code>memory/vision.md</code> — the north star</td></tr>
+      <tr><td class="us">Blueprint <span class="pill">new</span></td><td class="t">typed <code>(blueprint)</code> Open Threads = the gaps</td></tr>
+      <tr><td class="us">Design</td><td class="t">Key Decisions + Architectural Invariants</td></tr>
+      <tr><td class="us">Implementation</td><td class="t">code / commits, traced in sessions</td></tr>
+      <tr><td class="us">Feedback</td><td class="t">the review ritual + decay + supersession</td></tr>
+    </table>
+  </section>
+
+  <!-- 8 -->
+  <section class="slide">
+    <div class="kicker">Why it's predictable</div>
+    <h2>The trace <span class="muted">is</span> the determinism</h2>
+    <div class="loop" style="font-size:.95em">
+      <span class="step">Implementation</span><span class="arr">serves →</span>
+      <span class="step">Design</span><span class="arr">serves →</span>
+      <span class="step">Blueprint</span><span class="arr">serves →</span>
+      <span class="step new">Vision</span>
+    </div>
+    <ul style="margin-top:1em">
+      <li>Linked by stable <code>id</code>s. A missing or broken link <b>is</b> drift — and it's <b>grep-detectable</b>.</li>
+      <li>The <b>trace and the gates</b> are deterministic; the <b>content</b> — vision, design ideas — stays creative, human–AI. No scoring.</li>
+      <li>That's <b>predictable innovation</b>: bold ideas, faithful delivery, a human in the loop at every altitude.</li>
+    </ul>
+  </section>
+
+  <!-- 9 · skills (new in v4.1.0) -->
+  <section class="slide">
+    <div class="kicker">v4.1.0 · capability layer</div>
+    <h2>A third shared leg: <span class="grad">cross-vendor skills</span></h2>
+    <p class="lead">Memory and steering were already shared across vendors. <b>Skills</b> — reusable capabilities — are the third leg: one neutral, committed source of truth, runnable by any agent.</p>
+    <div class="grid g3" style="margin-top:.6em">
+      <div class="card"><h3>Neutral source</h3><p>Committed <code>agent-skills/&lt;name&gt;/SKILL.md</code> — a name, a when-to-use description, a procedure. The single source of truth; travels with the repo.</p></div>
+      <div class="card"><h3>Universal runtime</h3><p>The <code>memory/PROTOCOL.md</code> skills baseline: when a task matches, the agent reads &amp; follows the skill. The agent <i>is</i> the runtime — any vendor, no engine.</p></div>
+      <div class="card"><h3>Thin adapters</h3><p>Regenerated, gitignored pointers across <b>six</b> vendors — Claude, Gemini, Cursor, Kiro, GitHub Copilot &amp; Google Antigravity — give native auto-trigger; never copies, so the neutral skill never drifts.</p></div>
+    </div>
+    <p class="lead" style="margin-top:1em">Migration <b>promotes</b> a vendor's skills (e.g. <code>.claude/skills/</code>) into the shared layer — originals preserved under <code>legacy/</code>, never flattened into steering.</p>
+  </section>
+
+  <!-- 9a · seven built-ins + judgment vs arithmetic -->
+  <section class="slide">
+    <div class="kicker">capability layer · matured</div>
+    <h2><span class="grad">Seven</span> built-ins, one boundary</h2>
+    <p class="lead">Installed into every enabled repo, tool-managed. They sort along the principle the layer learned the hard way: <b>mechanize the arithmetic, leave the judgment to the agent.</b></p>
+    <div class="two" style="margin-top:.8em">
+      <div class="layer back">
+        <div class="tag">Arithmetic · mechanized</div>
+        <ul style="margin:.4em 0">
+          <li><code>memory-lint</code> — 9-check integrity verifier (Python <i>and</i> Node)</li>
+          <li><code>refresh-metadata</code> — recompute every fact's tier/usage</li>
+          <li><code>archive-fact</code> — the archive <i>move</i>, truncation-proof</li>
+          <li><code>sync-adapters</code> — regenerate the 6 vendor adapters</li>
+        </ul>
+      </div>
+      <div class="layer fwd">
+        <div class="tag">Judgment · stays with the agent</div>
+        <ul style="margin:.4em 0">
+          <li><code>harvest-knowledge</code> — distil durable facts from docs</li>
+          <li><code>second-opinion</code> — snapshot for a clean-memory reviewer</li>
+          <li><code>apply-critique</code> — bounded, human-gated apply loop</li>
+          <li class="muted"><i>what to archive · how to resolve a clash · the Vision</i></li>
+        </ul>
+      </div>
+    </div>
+    <p class="lead" style="margin-top:.9em"><b>Why:</b> capable agents silently do <i>half</i> a multi-step ritual. The fix is structural — a runnable helper for the arithmetic + a lint advisory for the gap — never automating the <b>decision</b>.</p>
+  </section>
+
+  <!-- 9b · fresh-context second opinion -->
+  <section class="slide">
+    <div class="kicker">fresh-context review</div>
+    <h2>A <span class="grad">second opinion</span> from clean memory</h2>
+    <p class="lead">A long session over-trusts its own trajectory. The highest-value antidote is a reviewer with <b>clean memory</b> — a fresh session or a different vendor that didn't live the work. Shipped as two built-in skills, installed into every enabled repo.</p>
+    <div class="loop" style="margin-top:.8em">
+      <span class="step"><b>SNAPSHOT</b>second-opinion</span><span class="arr">→</span>
+      <span class="step">security advisory</span><span class="arr">→</span>
+      <span class="step">clean-context reviewer</span><span class="arr">→</span>
+      <span class="step"><b>APPLY</b>apply-critique</span><span class="arr">→</span>
+      <span class="step">validate + human gate</span>
+    </div>
+    <div class="grid g3" style="margin-top:1em">
+      <div class="card"><h3>Derived, not duplicated</h3><p>The snapshot is distilled from <code>continuity.md</code> + recent sessions — never a parallel state file. Behind a security advisory you must acknowledge before any state leaves the perimeter.</p></div>
+      <div class="card"><h3>Bounded &amp; gated</h3><p><code>apply-critique</code> plans a few scoped fixes, runs deterministic checks (build/tests + <code>memory-lint</code>), then summarizes applied vs. rejected. The human gates the result.</p></div>
+      <div class="card new"><h3>Hypothesis, not authority</h3><p>A clean reviewer can be confidently wrong (one once over-archived live facts). So critique is <b>advisory</b>, gated by deterministic checks + a human — the lesson baked in.</p></div>
+    </div>
+  </section>
+
+  <!-- 9c · operational reliability -->
+  <section class="slide">
+    <div class="kicker">making the ritual happen</div>
+    <h2>No protocol survives a <span class="grad">manual step</span></h2>
+    <p class="lead">A ritual that depends on the agent self-triggering fails the moment it lands with an untrained team. So execution got hardened, not just documented — <b>zero manual user step</b>.</p>
+    <div class="grid g3" style="margin-top:.6em">
+      <div class="card"><h3>Composable triggers</h3><p>Committed <code>pre-commit</code> + <code>post-commit</code> dispatchers run ordered <code>*.d</code> fragments, so hook layers compose. The secret-guard fragment blocks staged credentials; ritual capture auto-stubs a missing session log + re-syncs adapters; a <b>CI floor</b> runs <code>memory-lint</code> + a changed-config scan. The tool runs nothing — git &amp; CI do.</p></div>
+      <div class="card"><h3>First-run init + Windows</h3><p>One idempotent <code>init.sh</code> regenerates adapters &amp; activates the dispatchers on a fresh clone; <code>.gitattributes</code> pins shell scripts + hook fragments to LF so Git for Windows can't break them.</p></div>
+      <div class="card"><h3>Merge at team scale</h3><p><code>MERGE.md</code> <b>never picks a winner</b> (clash → preserve both + Contradiction). And v4.39.0 removed the measured conflict surfaces <b>structurally</b>: one Open Thread per file, the merge-hottest field dropped, archives union-merge — parallel contributors stop colliding, while a genuine same-thread clash still conflicts into the human gate.</p></div>
+    </div>
+    <p class="lead" style="margin-top:.9em">Enable opens with an <b>exec summary + cancel gate</b> — informed consent before a single file is written.</p>
+  </section>
+
+  <!-- 10 · supported vendors -->
+  <section class="slide">
+    <div class="kicker">Vendor support</div>
+    <h2>One shared memory, <span class="grad">every major AI tool</span></h2>
+    <p class="lead">"AI enable this repo" detects whatever AI footprint already exists, folds it into the shared layer, and routes that vendor's agent to the one hub — originals preserved, never deleted.</p>
+    <div class="loop" style="margin-top:.8em">
+      <span class="step">Claude Code</span>
+      <span class="step">Cursor</span>
+      <span class="step">GitHub Copilot</span>
+      <span class="step">Gemini CLI</span>
+      <span class="step">GPT / Codex</span>
+      <span class="step">Cline</span>
+      <span class="step">Roo Code</span>
+      <span class="step">Aider</span>
+      <span class="step">Continue.dev</span>
+      <span class="step">Codeium / Windsurf</span>
+      <span class="step">Zed AI</span>
+      <span class="step">Amazon Kiro</span>
+      <span class="step new">Google Antigravity <span class="pill" style="border-color:var(--accent);color:var(--ink)">new</span></span>
+    </div>
+    <div class="grid g2" style="margin-top:1.1em">
+      <div class="card"><h3>Detected &amp; migrated, not re-typed</h3><p>Steering folds into <code>memory/</code>; chat history becomes session logs; a vendor's skills are <b>promoted</b> into the neutral <code>agent-skills/</code> layer.</p></div>
+      <div class="card new"><h3>Riding open standards = future-proof</h3><p>We bet on <code>AGENTS.md</code> (universal discovery) and the open <b>Agent Skills</b> standard (capabilities). Tools that adopt them — Kiro, Copilot, Antigravity, Codex — plug in with little or no glue. <b>Each shipped as a point release.</b></p></div>
+    </div>
+  </section>
+
+  <!-- 11 -->
+  <section class="slide">
+    <div class="kicker">Principles</div>
+    <h2>Lightweight by design</h2>
+    <div class="grid g3">
+      <div class="card"><h3>Vendor-neutral</h3><p>One shared memory; thin per-vendor pointers route every agent (Claude, Gemini, Cursor…) to one hub. No lock-in.</p></div>
+      <div class="card"><h3>No-code, markdown</h3><p>No build/lint/test. Git-native governance: immutable ledger + mutable projection + replay.</p></div>
+      <div class="card"><h3>Deterministic</h3><p>Every decision is counting or comparing integers — reproducible across agents and runs.</p></div>
+      <div class="card"><h3>Guide, don't prescribe</h3><p>Loop over process; simplicity over completeness. No ceremony.</p></div>
+      <div class="card"><h3>Never pick a winner</h3><p>Contradictions and the Vision are surfaced for a human, not resolved silently.</p></div>
+      <div class="card"><h3>Additive upgrades</h3><p>Versioned; an older repo upgrades in place via an idempotent, non-destructive ladder.</p></div>
+    </div>
+  </section>
+
+  <!-- 12 -->
+  <section class="slide">
+    <div class="kicker">Proof</div>
+    <h2>It earned its thesis on real work</h2>
+    <div class="grid g3">
+      <div class="card"><h3>Node.js → Rust rewrite</h3><p>A full rewrite delivered against recorded intent — invariants, decisions, and their <i>why</i> pinned and traceable — <b>deterministic, faithful, no drift.</b></p></div>
+      <div class="card"><h3>Dogfooded</h3><p>The tool carries its own memory, Vision, and Blueprint — and the VBDI layer was designed <b>using the VBDI loop</b>. Using the thing to build the thing.</p></div>
+      <div class="card new"><h3>Cross-vendor, real product repo</h3><p>Driven end-to-end on a large Accenture repo by <b>GitHub Copilot / Gemini 3.1 Pro</b> — it even <i>independently reinvented</i> <code>refresh-metadata</code>. Since exercised with <b>Cursor</b> and <b>Grok</b> — the latter with <i>no adapter at all</i>, activated by the one-line <code>AGENTS.md</code> shim alone.</p></div>
+    </div>
+    <p class="lead" style="margin-top:1em">An industry-alignment self-assessment's known gaps — supersession, <span style="white-space:nowrap">invariant re-checking</span>, contradiction, evaluation, provenance — all shipped as additive, versioned releases.</p>
+    <p class="lead" style="margin-top:.6em"><b>Graduated September 10, 2026:</b> having proven itself across multiple field installations, agent-memory was promoted from independent research into the <b>Mercury family</b> — Accenture's open-source foundation of advanced software for human–AI collaboration. Same tool, same version.</p>
+  </section>
+
+  <!-- 13 -->
+  <section class="slide">
+    <div class="kicker">Differentiators</div>
+    <h2>vs. common practice</h2>
+    <table>
+      <tr><th>Dimension</th><th>Common practice</th><th>agent-memory</th></tr>
+      <tr><td class="us">Persistence</td><td class="t">per-vendor files / vector store</td><td>one shared, git-committed markdown layer</td></tr>
+      <tr><td class="us">Forgetting</td><td class="t">similarity scores, TTLs</td><td>deterministic tiering by counting</td></tr>
+      <tr><td class="us">Truth maintenance</td><td class="t">overwrite / let stale persist</td><td>supersession + contradiction + re-verify</td></tr>
+      <tr><td class="us">Context freshness</td><td class="t">static context files that drift</td><td><b>living context</b>: decay, review &amp; supersession keep the explanatory layer true</td></tr>
+      <tr><td class="us">Intent → delivery</td><td class="t">unmanaged</td><td>VBDI trace, grep-detectable drift</td></tr>
+      <tr><td class="us">Governance</td><td class="t">opaque</td><td>git history + markdown + human gates</td></tr>
+      <tr><td class="us">Vendor coupling</td><td class="t">locked to one tool</td><td>neutral; one hub</td></tr>
+      <tr><td class="us">Capabilities</td><td class="t">per-vendor skill files</td><td>neutral <code>agent-skills/</code>: 7 built-ins × 6 adapters; any agent</td></tr>
+      <tr><td class="us">Ritual execution</td><td class="t">relies on the agent self-triggering</td><td>git hooks (incl. an enforcing secret guard) + CI + runnable helpers; arithmetic mechanized, judgment left to the agent; no manual step</td></tr>
+    </table>
+  </section>
+
+  <!-- 14 -->
+  <section class="slide">
+    <div class="kicker">Adoption</div>
+    <h2>Point it at a repo</h2>
+    <div class="loop">
+      <span class="step"><b>FRESH</b>generate memory</span><span class="arr">·</span>
+      <span class="step"><b>MIGRATE</b>fold vendor files in</span><span class="arr">·</span>
+      <span class="step"><b>UPGRADE</b>in place, idempotent</span>
+    </div>
+    <ul style="margin-top:1em">
+      <li><b>"AI enable this repo."</b> It detects any existing AI footprint and picks the mode — originals preserved under <code>legacy/</code>, never deleted.</li>
+      <li>Bootstraps a <b>DRAFT Vision</b> + a human gate; never fabricates intent.</li>
+      <li>No process rollout. The team's process weight is the team's choice.</li>
+    </ul>
+  </section>
+
+  <!-- 15 -->
+  <section class="slide">
+    <div class="kicker">Roadmap &amp; mission</div>
+    <p class="quote"><span class="grad">Memory is the deterministic substrate.<br>The loop is the lightweight control layer.</span></p>
+    <p class="lead" style="margin-top:1em">Next (tracked as Blueprint gaps): greenfield flow · more multi-user hardening (<code>MERGE.md</code> + the v4.39.0 merge-scale layout shipped) · an optional SDLC overlay for teams that want it.</p>
+    <p class="big" style="margin-top:1em"><b>Predictable innovation with human partnership</b> — bold ideas, faithful delivery, the human in the loop at every altitude.</p>
+    <p class="lead" style="margin-top:.9em">Companion article: <a href="https://www.linkedin.com/posts/ericclaw_intent-driven-development-activity-7493145001313390593-cyc5" style="color:inherit"><b>From Context Engineering to Intent-Driven Development</b></a> — the argument behind this system, written from its evolution.</p>
+    <div class="foot">agent-memory · v4.39.2 · Mercury family · github.com/Accenture/mercury-go</div>
+  </section>
+
+  <!-- chrome -->
+  <button class="zone zback" id="zback" aria-label="Previous slide" tabindex="-1"></button>
+  <button class="zone zfwd" id="zfwd" aria-label="Next slide" tabindex="-1"></button>
+  <div class="bar">
+    <a class="home" href="https://accenture.github.io/mercury-go/"
+       title="agent-memory home" aria-label="agent-memory home">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21.33,12.91C21.42,14.46 20.71,15.95 19.44,16.86L20.21,18.35C20.44,18.8 20.47,19.33 20.27,19.8C20.08,20.27 19.69,20.64 19.21,20.8L18.42,21.05C18.25,21.11 18.06,21.14 17.88,21.14C17.37,21.14 16.89,20.91 16.56,20.5L14.44,18C13.55,17.85 12.71,17.47 12,16.9C11.5,17.05 11,17.13 10.5,17.13C9.62,17.13 8.74,16.86 8,16.34C7.47,16.5 6.93,16.57 6.38,16.56C5.59,16.57 4.81,16.41 4.08,16.11C2.65,15.47 1.7,14.07 1.65,12.5C1.57,11.78 1.69,11.05 2,10.39C1.71,9.64 1.68,8.82 1.93,8.06C2.3,7.11 3,6.32 3.87,5.82C4.45,4.13 6.08,3 7.87,3.12C9.47,1.62 11.92,1.46 13.7,2.75C14.12,2.64 14.56,2.58 15,2.58C16.36,2.55 17.65,3.15 18.5,4.22C20.54,4.75 22,6.57 22.08,8.69C22.13,9.8 21.83,10.89 21.22,11.82C21.29,12.18 21.33,12.54 21.33,12.91M16.33,11.5C16.9,11.57 17.35,12 17.35,12.57A1,1 0 0,1 16.35,13.57H15.72C15.4,14.47 14.84,15.26 14.1,15.86C14.35,15.95 14.61,16 14.87,16.07C20,16 19.4,12.87 19.4,12.82C19.34,11.39 18.14,10.27 16.71,10.33A1,1 0 0,1 15.71,9.33A1,1 0 0,1 16.71,8.33C17.94,8.36 19.12,8.82 20.04,9.63C20.09,9.34 20.12,9.04 20.12,8.74C20.06,7.5 19.5,6.42 17.25,6.21C16,3.25 12.85,4.89 12.85,5.81V5.81C12.82,6.04 13.06,6.53 13.1,6.56A1,1 0 0,1 14.1,7.56C14.1,8.11 13.65,8.56 13.1,8.56V8.56C12.57,8.54 12.07,8.34 11.67,8C11.19,8.31 10.64,8.5 10.07,8.56V8.56C9.5,8.61 9.03,8.21 9,7.66C8.92,7.1 9.33,6.61 9.88,6.56C10.04,6.54 10.82,6.42 10.82,5.79V5.79C10.82,5.13 11.07,4.5 11.5,4C10.58,3.75 9.59,4.08 8.59,5.29C6.75,5 6,5.25 5.45,7.2C4.5,7.67 4,8 3.78,9C4.86,8.78 5.97,8.87 7,9.25C7.5,9.44 7.78,10 7.59,10.54C7.4,11.06 6.82,11.32 6.3,11.13C5.57,10.81 4.75,10.79 4,11.07C3.68,11.34 3.68,11.9 3.68,12.34C3.68,13.08 4.05,13.77 4.68,14.17C5.21,14.44 5.8,14.58 6.39,14.57C6.24,14.31 6.11,14.04 6,13.76C5.81,13.22 6.1,12.63 6.64,12.44C7.18,12.25 7.77,12.54 7.96,13.08C8.36,14.22 9.38,15 10.58,15.13C11.95,15.06 13.17,14.25 13.77,13C14,11.62 15.11,11.5 16.33,11.5M18.33,18.97L17.71,17.67L17,17.83L18,19.08L18.33,18.97M13.68,10.36C13.7,9.83 13.3,9.38 12.77,9.33C12.06,9.29 11.37,9.53 10.84,10C10.27,10.58 9.97,11.38 10,12.19A1,1 0 0,0 11,13.19C11.57,13.19 12,12.74 12,12.19C12,11.92 12.07,11.65 12.23,11.43C12.35,11.33 12.5,11.28 12.66,11.28C13.21,11.31 13.68,10.9 13.68,10.36Z"/></svg>
+      <span class="wordmark">agent<span class="dot">·</span>memory</span>
+    </a>
+    <span class="hint">← → to navigate · P to print the handout</span>
+    <nav class="dots" id="dots" aria-label="Slides"></nav>
+    <button class="navbtn" id="prev" aria-label="Previous">‹ Prev</button>
+    <button class="navbtn" id="next" aria-label="Next">Next ›</button>
+    <span class="counter" id="counter">1 / 1</span>
+  </div>
+</div>
+<script>
+(function () {
+  "use strict";
+  var slides = Array.prototype.slice.call(document.querySelectorAll(".slide"));
+  var dots = document.getElementById("dots");
+  var counter = document.getElementById("counter");
+  var i = 0;
+
+  slides.forEach(function (s, k) {
+    var b = document.createElement("button");
+    var kicker = s.querySelector(".kicker");
+    b.type = "button";
+    b.setAttribute("aria-label", "Slide " + (k + 1) + ": " +
+      (s.getAttribute("aria-label") || (kicker ? kicker.textContent : "")));
+    b.addEventListener("click", function () { go(k); });
+    dots.appendChild(b);
+  });
+
+  function go(k) {
+    if (k < 0 || k >= slides.length) return;
+    slides[i].classList.remove("active");
+    i = k;
+    slides[i].classList.add("active");
+    slides[i].scrollTop = 0;
+    counter.textContent = (i + 1) + " / " + slides.length;
+    document.getElementById("bar").style.width = (i / (slides.length - 1) * 100) + "%";
+    Array.prototype.forEach.call(dots.children, function (d, k2) {
+      d.classList.toggle("on", k2 === i);
+    });
+    if (("#" + (i + 1)) !== location.hash) {
+      try { history.replaceState(null, "", "#" + (i + 1)); } catch (e) { /* file:// */ }
+    }
+  }
+  function fromHash() {
+    var n = parseInt(location.hash.slice(1), 10);
+    go(isNaN(n) ? 0 : n - 1);
+  }
+
+  document.getElementById("next").addEventListener("click", function () { go(i + 1); });
+  document.getElementById("prev").addEventListener("click", function () { go(i - 1); });
+  document.getElementById("zfwd").addEventListener("click", function () { go(i + 1); });
+  document.getElementById("zback").addEventListener("click", function () { go(i - 1); });
+  window.addEventListener("hashchange", fromHash);
+  document.addEventListener("keydown", function (e) {
+    if (e.altKey || e.ctrlKey || e.metaKey) return;
+    switch (e.key) {
+      case "ArrowRight": case "PageDown": case " ": go(i + 1); e.preventDefault(); break;
+      case "ArrowLeft": case "PageUp": go(i - 1); e.preventDefault(); break;
+      case "Home": go(0); e.preventDefault(); break;
+      case "End": go(slides.length - 1); e.preventDefault(); break;
+      case "p": case "P": window.print(); break;
+    }
+  });
+  fromHash();
+})();
+</script>
+</body>
+</html>
